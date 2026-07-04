@@ -1,0 +1,21 @@
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+
+# Angular
+hotel-stay-availablity-ui/node_modules/
+hotel-stay-availablity-ui/dist/
+hotel-stay-availablity-ui/.angular/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local

@@ -1,0 +1,152 @@
+<div class="search-container">
+  <h2>Search Hotels</h2>
+  
+  <div class="form-group">
+    <label>Destination:</label>
+    <input type="text" [(ngModel)]="destination" placeholder="e.g., Paris, New York">
+  </div>
+
+  <div class="form-group">
+    <label>Check-in (YYYY-MM-DD):</label>
+    <input type="text" [(ngModel)]="checkIn" placeholder="YYYY-MM-DD">
+  </div>
+
+  <div class="form-group">
+    <label>Check-out (YYYY-MM-DD):</label>
+    <input type="text" [(ngModel)]="checkOut" placeholder="YYYY-MM-DD">
+  </div>
+
+  <div class="form-group">
+    <label>Room Type (optional):</label>
+    <select [(ngModel)]="roomType">
+      <option value="">All</option>
+      <option value="Standard">Standard</option>
+      <option value="Deluxe">Deluxe</option>
+      <option value="Suite">Suite</option>
+    </select>
+  </div>
+
+  <button (click)="search()" [disabled]="loading">
+    {{ loading ? 'Searching...' : 'Search' }}
+  </button>
+
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <div *ngIf="results" class="results">
+    <h3>Available Rooms in {{ results.destination }}</h3>
+    <p>Check-in: {{ results.checkIn }} | Check-out: {{ results.checkOut }}</p>
+    
+    <div *ngIf="results.rooms.length === 0" class="empty">
+      No available rooms found
+    </div>
+
+    <table *ngIf="results.rooms.length > 0">
+      <thead>
+        <tr>
+          <th>Provider</th>
+          <th>Room Type</th>
+          <th>Per Night</th>
+          <th>Total Stay</th>
+          <th>Cancellation</th>
+          <th>Amenities</th>
+          <th>Rating</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let room of results.rooms">
+          <td>{{ room.providerName }}</td>
+          <td>{{ room.roomType }}</td>
+          <td>${{ room.perNightRate }}</td>
+          <td>${{ room.totalStayPrice }}</td>
+          <td>{{ room.cancellationPolicy }}</td>
+          <td>{{ room.amenities?.join(', ') || '—' }}</td>
+          <td>{{ room.starRating || '—' }}</td>
+          <td>
+            <button (click)="selectRoom(room)">Reserve</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<style>
+.search-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.form-group {
+  margin: 15px 0;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+input, select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #d32f2f;
+  padding: 10px;
+  background-color: #ffebee;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+.results {
+  margin-top: 30px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: #f5f5f5;
+  font-weight: bold;
+}
+
+tr:hover {
+  background-color: #f9f9f9;
+}
+
+.empty {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+</style>
