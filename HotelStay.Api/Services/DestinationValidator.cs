@@ -4,7 +4,7 @@ using HotelStay.Api.Models;
 
 public class DestinationValidator
 {
-    private static readonly Dictionary<string, DestinationCategory> Destinations = new()
+    private static readonly Dictionary<string, DestinationCategory> Destinations = new(StringComparer.OrdinalIgnoreCase)
     {
         { "New York", DestinationCategory.Domestic },
         { "Los Angeles", DestinationCategory.Domestic },

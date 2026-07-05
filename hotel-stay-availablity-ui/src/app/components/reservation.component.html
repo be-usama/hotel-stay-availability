@@ -1,9 +1,12 @@
-<div class="reservation-container" *ngIf="room">
+<div class="reservation-container" *ngIf="room && !confirmation">
   <h2>Book Room</h2>
   
   <div class="room-summary">
     <p><strong>Provider:</strong> {{ room.providerName }}</p>
     <p><strong>Room Type:</strong> {{ room.roomType }}</p>
+    <p><strong>Destination:</strong> {{ selection?.destination }}</p>
+    <p><strong>Check-in:</strong> {{ selection?.checkIn }}</p>
+    <p><strong>Check-out:</strong> {{ selection?.checkOut }}</p>
     <p><strong>Total Price:</strong> ${{ room.totalStayPrice }}</p>
   </div>
 
@@ -28,8 +31,8 @@
   <div *ngIf="error" class="error">{{ error }}</div>
 
   <div class="buttons">
-    <button (click)="reserve()" [disabled]="loading" class="btn-primary">
-      {{ loading ? 'Reserving...' : 'Confirm Reservation' }}
+    <button (click)="reserve()" [disabled]="loading || !guestName.trim() || !documentNumber.trim()" class="btn-primary">
+      {{ loading ? 'Reserve' : 'Confirm Reservation' }}
     </button>
     <button (click)="cancel()" class="btn-secondary">Cancel</button>
   </div>
@@ -42,102 +45,13 @@
     <p><strong>Reference Number:</strong> {{ confirmation.referenceNumber }}</p>
     <p><strong>Guest Name:</strong> {{ confirmation.guestName }}</p>
     <p><strong>Provider:</strong> {{ confirmation.providerName }}</p>
-    <p><strong>Room Type:</strong> {{ confirmation.roomType }}</p>
-    <p><strong>Check-in:</strong> {{ confirmation.checkIn }}</p>
-    <p><strong>Check-out:</strong> {{ confirmation.checkOut }}</p>
+    <p><strong>Room Type:</strong> {{ formatRoomType(confirmation.roomType) }}</p>
+    <p><strong>Check-in:</strong> {{ confirmation.checkIn | date:'mediumDate' }}</p>
+    <p><strong>Check-out:</strong> {{ confirmation.checkOut | date:'mediumDate' }}</p>
     <p><strong>Total Price:</strong> ${{ confirmation.totalPrice }}</p>
-    <p><strong>Cancellation Policy:</strong> {{ confirmation.cancellationPolicy }}</p>
+    <p><strong>Cancellation Policy:</strong> {{ formatCancellationPolicy(confirmation.cancellationPolicy) }}</p>
     <p><strong>Status:</strong> {{ confirmation.status }}</p>
   </div>
 
-  <button (click)="confirmation = null" class="btn-primary">New Search</button>
+  <button (click)="startNewSearch()" class="btn-primary">New Search</button>
 </div>
-
-<style>
-.reservation-container, .confirmation-container {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background-color: #f9f9f9;
-}
-
-.room-summary {
-  background-color: #e3f2fd;
-  padding: 15px;
-  border-radius: 4px;
-  margin-bottom: 20px;
-}
-
-.room-summary p {
-  margin: 5px 0;
-}
-
-.form-group {
-  margin: 15px 0;
-}
-
-label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-input, select {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-
-.buttons {
-  margin-top: 20px;
-  display: flex;
-  gap: 10px;
-}
-
-button {
-  flex: 1;
-  padding: 10px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.btn-primary {
-  background-color: #007bff;
-  color: white;
-}
-
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
-}
-
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.error {
-  color: #d32f2f;
-  padding: 10px;
-  background-color: #ffebee;
-  border-radius: 4px;
-  margin-bottom: 15px;
-}
-
-.confirmation-details {
-  background-color: #c8e6c9;
-  padding: 15px;
-  border-radius: 4px;
-  margin: 15px 0;
-}
-
-.confirmation-details p {
-  margin: 8px 0;
-}
-</style>

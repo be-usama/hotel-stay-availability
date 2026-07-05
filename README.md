@@ -4,14 +4,14 @@ Build a Hotel Availability feature with search, reservation, and document valida
 
 ## Project Structure
 
-- **HotelStay.Api**: .NET 8+ Minimal API backend
+- **HotelStay.Api**: .NET 10 Minimal API backend
 - **HotelStay.Tests**: xUnit tests
 - **hotel-stay-availablity-ui**: Angular frontend
 
 ## Setup
 
 ### Prerequisites
-- .NET 8 SDK
+- .NET 10 SDK
 - Node.js 18+ and npm
 - Angular CLI (optional, can use `npx ng`)
 
@@ -36,8 +36,10 @@ npm install
 ```bash
 cd HotelStay.Api
 dotnet run
-# API runs on https://localhost:5000
+# API runs on https://localhost:7101 (or http://localhost:5278)
 ```
+
+In Development, OpenAPI is available at `https://localhost:7101/openapi/v1.json` and Swagger UI at `https://localhost:7101/swagger`.
 
 ### Start Frontend (in new terminal)
 ```bash

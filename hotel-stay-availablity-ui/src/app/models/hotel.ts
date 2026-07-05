@@ -40,3 +40,10 @@ export interface ReservationConfirmation {
   cancellationPolicy: CancellationPolicy;
   status: string;
 }
+
+export interface ReservationSelection {
+  room: Room;
+  destination: string;
+  checkIn: string;
+  checkOut: string;
+}

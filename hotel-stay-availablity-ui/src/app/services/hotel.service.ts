@@ -7,7 +7,7 @@ import { SearchResponse, ReservationRequest, ReservationConfirmation } from '../
   providedIn: 'root'
 })
 export class HotelService {
-  private apiUrl = 'http://localhost:5000/hotels';
+  private apiUrl = 'http://localhost:5278/hotels';
 
   constructor(private http: HttpClient) { }
 

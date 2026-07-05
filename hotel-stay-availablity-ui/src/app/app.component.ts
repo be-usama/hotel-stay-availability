@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SearchComponent } from './components/search.component';
 import { ReservationComponent } from './components/reservation.component';
+import { ReservationSelection } from './models/hotel';
 
 @Component({
   selector: 'app-root',
@@ -15,8 +16,11 @@ import { ReservationComponent } from './components/reservation.component';
       </header>
       
       <main class="app-main">
-        <app-search></app-search>
-        <app-reservation></app-reservation>
+        <app-search (roomSelected)="onRoomSelected($event)"></app-search>
+        <app-reservation
+          [selection]="selectedReservation"
+          (cleared)="clearSelection()">
+        </app-reservation>
       </main>
 
       <footer class="app-footer">
@@ -69,4 +73,14 @@ import { ReservationComponent } from './components/reservation.component';
     }
   `]
 })
-export class AppComponent { }
+export class AppComponent {
+  selectedReservation: ReservationSelection | null = null;
+
+  onRoomSelected(selection: ReservationSelection) {
+    this.selectedReservation = selection;
+  }
+
+  clearSelection() {
+    this.selectedReservation = null;
+  }
+}

@@ -58,4 +58,70 @@ public class ProviderTests
         Assert.Equal(600, deluxeRoom.TotalStayPrice); // 4 nights * 150
         Assert.Equal(4, deluxeRoom.NumberOfNights);
     }
+
+    [Fact]
+    public async Task PremierStaysProvider_NoRoomTypeFilter_ReturnsAllRoomTypes()
+    {
+        var provider = new PremierStaysProvider();
+        var checkIn = DateTime.Now.Date.AddDays(1);
+        var checkOut = checkIn.AddDays(2);
+
+        var rooms = await provider.GetAvailableRooms("Paris", checkIn, checkOut);
+
+        Assert.Equal(3, rooms.Count);
+        Assert.Contains(rooms, r => r.RoomType == RoomType.Standard);
+        Assert.Contains(rooms, r => r.RoomType == RoomType.Deluxe);
+        Assert.Contains(rooms, r => r.RoomType == RoomType.Suite);
+    }
+
+    [Fact]
+    public async Task PremierStaysProvider_WithRoomTypeFilter_ReturnsOnlyThatType()
+    {
+        var provider = new PremierStaysProvider();
+        var checkIn = DateTime.Now.Date.AddDays(1);
+        var checkOut = checkIn.AddDays(2);
+
+        var rooms = await provider.GetAvailableRooms("Paris", checkIn, checkOut, RoomType.Suite);
+
+        var room = Assert.Single(rooms);
+        Assert.Equal(RoomType.Suite, room.RoomType);
+    }
+
+    [Fact]
+    public async Task BudgetNestsProvider_WithRoomTypeFilter_ReturnsOnlyThatType()
+    {
+        var provider = new BudgetNestsProvider();
+        var checkIn = DateTime.Now.Date.AddDays(1);
+        var checkOut = checkIn.AddDays(2);
+
+        var rooms = await provider.GetAvailableRooms("London", checkIn, checkOut, RoomType.Standard);
+
+        var room = Assert.Single(rooms);
+        Assert.Equal(RoomType.Standard, room.RoomType);
+        Assert.Equal(60, room.PerNightRate);
+    }
+
+    [Fact]
+    public async Task BudgetNestsProvider_UsesFlexibleCancellationPolicy()
+    {
+        var provider = new BudgetNestsProvider();
+        var checkIn = DateTime.Now.Date.AddDays(1);
+        var checkOut = checkIn.AddDays(2);
+
+        var rooms = await provider.GetAvailableRooms("London", checkIn, checkOut);
+
+        Assert.All(rooms, room => Assert.Equal(CancellationPolicy.Flexible, room.CancellationPolicy));
+    }
+
+    [Fact]
+    public async Task PremierStaysProvider_UsesFreeCancellationPolicy()
+    {
+        var provider = new PremierStaysProvider();
+        var checkIn = DateTime.Now.Date.AddDays(1);
+        var checkOut = checkIn.AddDays(2);
+
+        var rooms = await provider.GetAvailableRooms("Paris", checkIn, checkOut);
+
+        Assert.All(rooms, room => Assert.Equal(CancellationPolicy.FreeCancellation, room.CancellationPolicy));
+    }
 }

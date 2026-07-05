@@ -1,5 +1,3 @@
-using System;
-using System.Threading.Tasks;
 using Xunit;
 using HotelStay.Api.Models;
 using HotelStay.Api.Services;

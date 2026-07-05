@@ -7,13 +7,13 @@
   </div>
 
   <div class="form-group">
-    <label>Check-in (YYYY-MM-DD):</label>
-    <input type="text" [(ngModel)]="checkIn" placeholder="YYYY-MM-DD">
+    <label>Check-in:</label>
+    <input type="date" [(ngModel)]="checkIn" [min]="today">
   </div>
 
   <div class="form-group">
-    <label>Check-out (YYYY-MM-DD):</label>
-    <input type="text" [(ngModel)]="checkOut" placeholder="YYYY-MM-DD">
+    <label>Check-out:</label>
+    <input type="date" [(ngModel)]="checkOut" [min]="checkIn || today">
   </div>
 
   <div class="form-group">
@@ -26,7 +26,7 @@
     </select>
   </div>
 
-  <button (click)="search()" [disabled]="loading">
+  <button (click)="search()" [disabled]="loading || !destination.trim() || !checkIn || !checkOut">
     {{ loading ? 'Searching...' : 'Search' }}
   </button>
 
@@ -34,7 +34,7 @@
 
   <div *ngIf="results" class="results">
     <h3>Available Rooms in {{ results.destination }}</h3>
-    <p>Check-in: {{ results.checkIn }} | Check-out: {{ results.checkOut }}</p>
+    <p>Check-in: {{ results.checkIn | date:'yyyy-MM-dd' }} | Check-out: {{ results.checkOut | date:'yyyy-MM-dd' }}</p>
     
     <div *ngIf="results.rooms.length === 0" class="empty">
       No available rooms found
@@ -46,20 +46,28 @@
           <th>Provider</th>
           <th>Room Type</th>
           <th>Per Night</th>
-          <th>Total Stay</th>
+          <th>
+            <button type="button" class="sort-button" (click)="sortBy('totalStayPrice')">
+              Total Stay {{ getSortIndicator('totalStayPrice') }}
+            </button>
+          </th>
           <th>Cancellation</th>
           <th>Amenities</th>
-          <th>Rating</th>
+          <th>
+            <button type="button" class="sort-button" (click)="sortBy('starRating')">
+              Rating {{ getSortIndicator('starRating') }}
+            </button>
+          </th>
           <th>Action</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let room of results.rooms">
+        <tr *ngFor="let room of sortedRooms">
           <td>{{ room.providerName }}</td>
           <td>{{ room.roomType }}</td>
           <td>${{ room.perNightRate }}</td>
           <td>${{ room.totalStayPrice }}</td>
-          <td>{{ room.cancellationPolicy }}</td>
+          <td>{{ formatCancellationPolicy(room.cancellationPolicy) }}</td>
           <td>{{ room.amenities?.join(', ') || '—' }}</td>
           <td>{{ room.starRating || '—' }}</td>
           <td>
@@ -70,83 +78,3 @@
     </table>
   </div>
 </div>
-
-<style>
-.search-container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.form-group {
-  margin: 15px 0;
-}
-
-label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-input, select {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-
-button {
-  background-color: #007bff;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 10px;
-}
-
-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-.error {
-  color: #d32f2f;
-  padding: 10px;
-  background-color: #ffebee;
-  border-radius: 4px;
-  margin-top: 10px;
-}
-
-.results {
-  margin-top: 30px;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 15px;
-}
-
-th, td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
-}
-
-th {
-  background-color: #f5f5f5;
-  font-weight: bold;
-}
-
-tr:hover {
-  background-color: #f9f9f9;
-}
-
-.empty {
-  text-align: center;
-  padding: 20px;
-  color: #666;
-}
-</style>
