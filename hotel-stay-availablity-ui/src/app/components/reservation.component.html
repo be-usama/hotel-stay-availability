@@ -19,8 +19,9 @@
     <label>Document Type:</label>
     <select [(ngModel)]="documentType">
       <option [value]="DocumentType.Passport">Passport</option>
-      <option [value]="DocumentType.NationalId">National ID</option>
+      <option [value]="DocumentType.NationalId" [disabled]="isInternationalDestination">National ID</option>
     </select>
+    <small *ngIf="isInternationalDestination">International destinations require Passport.</small>
   </div>
 
   <div class="form-group">

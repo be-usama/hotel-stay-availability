@@ -2,9 +2,16 @@
 
 What would be improved with more time.
 
+## Suggested Priority Order
+
+1. **Data persistence first**: Replace in-memory reservations in `ReservationService` with PostgreSQL/SQL Server and add migration scripts.
+2. **Quality next**: Add integration tests for search → reserve → lookup and baseline structured logging.
+3. **Product polish**: Improve responsiveness/accessibility, then add advanced filters.
+4. **Scale-oriented items later**: Add caching, rate limiting, and real-time updates once traffic patterns justify them.
+
 ## Architecture & Design
 
-1. **Event-Driven Reservations**: Replace in-memory reservation storage with event sourcing or message queue (RabbitMQ/Azure Service Bus) to handle distributed scenarios and provide audit trail.
+1. **Event-Driven Reservations (Future Scale Option)**: If reservation throughput or cross-service workflows grow, evaluate event-driven processing (e.g., queue + outbox) for better resiliency and traceability.
 
 2. **Provider Abstraction**: Extend to real hotel APIs (Booking.com, Expedia) with adapter patterns, circuit breakers, and rate limiting.
 
@@ -12,9 +19,9 @@ What would be improved with more time.
 
 ## Data & Persistence
 
-1. **Database Layer**: Replace in-memory storage with PostgreSQL/SQL Server. Implement repository pattern for data access.
+1. **Database Layer**: Replace in-memory reservation storage in `ReservationService` with PostgreSQL/SQL Server. Add migrations and repository pattern for data access.
 
-2. **Transaction Management**: Add distributed transactions for concurrent reservations to prevent overbooking.
+2. **Concurrency Management**: Add optimistic concurrency / row-version checks and idempotency keys to prevent overbooking under concurrent requests.
 
 3. **Audit Logging**: Track all reservation changes with timestamps, user IDs, and state transitions.
 

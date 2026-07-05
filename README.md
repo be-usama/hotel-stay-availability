@@ -79,4 +79,4 @@ dotnet test
 - No authentication/authorization required
 - Stub providers return deterministic, representative data
 - All dates in YYYY-MM-DD format
-- Rates are per-night; frontend calculates total
+- Rates are per-night; API also returns computed totals for convenience (`totalStayPrice` / `totalPrice`)

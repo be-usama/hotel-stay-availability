@@ -1,39 +1,107 @@
 # AI Prompts Used
 
-This document tracks AI prompts used during development with notes on key decisions.
+This document records how AI was used during implementation, including prompt iterations, key judgment calls, and human review decisions.
 
-## Backend Architecture & Design
+## 1) Backend Architecture & Provider Integration
 
-**Prompt**: "Design a hotel availability system with search and reservation endpoints, supporting two stub providers with different response formats (PascalCase vs snake_case). Include document validation based on destination type (domestic vs international)."
+**Initial Prompt**: "Design a hotel availability system with search and reservation endpoints, supporting two stub providers with different response formats (PascalCase vs snake_case)."
 
-**Decision**: Implemented Provider pattern with IHotelProvider interface for extensibility. Both providers run in parallel during search.
+**Refined Prompt**: "Use an extensible provider abstraction and aggregate provider results in parallel. Keep provider-specific mapping isolated from API contracts."
 
-## Document Validation Logic
+**Key Judgment Calls**:
+- Chose `IHotelProvider` abstraction to avoid provider logic leaking into endpoints.
+- Ran provider calls in parallel for response time.
+- Standardized provider models into one API response shape.
 
-**Prompt**: "Create a validation service that validates travel documents based on destination category - domestic allows National ID or Passport, international requires Passport only."
+**Human Review**:
+- Confirmed provider logic remains behind service boundary.
+- Confirmed adding a new provider would require minimal API changes.
 
-**Decision**: Created DestinationValidator as a static service for reusability across API and tests. Centralized destination mappings.
+**Evidence**:
+- `HotelStay.Api/Services/HotelSearchService.cs`
+- `HotelStay.Api/Program.cs`
 
-## Minimal API Endpoints
+## 2) Document Validation Rules
 
-**Prompt**: "Create RESTful endpoints for hotel search with filtering, room reservation with validation, and reservation lookup. Handle errors with appropriate HTTP status codes (400 for validation, 422 for business logic errors)."
+**Initial Prompt**: "Validate travel documents by destination category."
 
-**Decision**: Used .NET 8 Minimal APIs for simplicity. Mapped complex error scenarios to specific HTTP codes.
+**Refined Prompt**: "Domestic accepts National ID or Passport; international requires Passport. Keep logic centralized and testable."
 
-## Angular Components
+**Key Judgment Calls**:
+- Implemented a dedicated validator (`DestinationValidator`) instead of inline endpoint checks.
+- Centralized destination/category mapping to prevent rule duplication.
 
-**Prompt**: "Create standalone Angular components for hotel search (form + results table) and reservation (form + confirmation). Use services to call backend APIs with proper error handling."
+**Human Review**:
+- Verified domestic/international branches match business rules.
+- Reviewed invalid-document scenarios for correct API behavior.
 
-**Decision**: Standalone components for modularity. Implemented shared models/enums between frontend and backend specs.
+**Evidence**:
+- `HotelStay.Api/Services/DestinationValidator.cs`
+- `HotelStay.Tests/DestinationValidatorTests.cs`
 
-## Unit Tests
+## 3) API Design & Error Semantics
 
-**Prompt**: "Write meaningful xUnit tests covering document validation rules for all destination types, provider data calculation, and error cases."
+**Initial Prompt**: "Create search, reserve, and lookup endpoints with proper status codes."
 
-**Decision**: Tests focus on business logic (validation, pricing calculations) rather than implementation details.
+**Refined Prompt**: "Use .NET Minimal API style, return 400 for validation problems and 422 for business-rule failures."
 
-## Provider Stubs
+**Key Judgment Calls**:
+- Kept endpoints thin; moved business logic to services.
+- Used explicit status code mapping to separate bad input vs valid-but-unfulfillable requests.
 
-**Prompt**: "Create deterministic stub implementations for PremierStays (full detail: rates, amenities, ratings, star ratings) and BudgetNests (minimal: rates only). Ensure different price points and cancellation policies."
+**Human Review**:
+- Checked endpoint contracts for predictable frontend consumption.
+- Checked negative paths to avoid generic 500 responses for expected rule failures.
 
-**Decision**: Hard-coded rates per room type for determinism. Each provider has distinct pricing strategy to show differentiation.
+**Evidence**:
+- `HotelStay.Api/Program.cs`
+- `HotelStay.Tests/HotelEndpointsTests.cs`
+
+## 4) Frontend Structure
+
+**Initial Prompt**: "Create Angular components for search and reservation."
+
+**Refined Prompt**: "Use standalone components with service-based API calls and clear user-facing error states."
+
+**Key Judgment Calls**:
+- Chose standalone components for simpler module setup.
+- Kept API communication in services, not components.
+
+**Human Review**:
+- Confirmed form + results + reservation flow is understandable and maintainable.
+- Confirmed errors are surfaced in UI flow, not silently ignored.
+
+**Evidence**:
+- Frontend search/reservation component and service files.
+
+## 5) Testing Strategy
+
+**Initial Prompt**: "Write meaningful tests for validation and provider calculations."
+
+**Refined Prompt**: "Prioritize business rules and deterministic outcomes over implementation-detail assertions."
+
+**Key Judgment Calls**:
+- Focused tests on validation rules, provider aggregation behavior, and reservation edge cases.
+- Used deterministic stub data to keep tests stable and repeatable.
+
+**Human Review**:
+- Verified tests align with business outcomes rather than internal method structure.
+- Verified failure scenarios are covered (not only happy paths).
+
+**Evidence**:
+- `HotelStay.Tests/DestinationValidatorTests.cs`
+- `HotelStay.Tests/ReservationServiceTests.cs`
+- `HotelStay.Tests/HotelEndpointsTests.cs`
+
+## 6) AI Usage Boundaries
+
+**How AI was used**:
+- Drafted initial architecture options, endpoint skeletons, and test case ideas.
+
+**How AI was not used**:
+- Final business rules, status code mapping, and structure were accepted only after human review.
+- No AI output was merged without code-level inspection and adjustment where needed.
+
+**Known Gaps**:
+- This log captures major decisions, not every minor prompt iteration.
+- Future updates should add commit references for stronger traceability.

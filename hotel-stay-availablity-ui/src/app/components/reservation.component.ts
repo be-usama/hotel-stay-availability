@@ -13,7 +13,25 @@ import { DocumentType } from '../models/enums';
   styleUrl: './reservation.component.scss'
 })
 export class ReservationComponent {
-  @Input() selection: ReservationSelection | null = null;
+  private static readonly destinationCategories: Record<string, 'Domestic' | 'International'> = {
+    'new york': 'Domestic',
+    'los angeles': 'Domestic',
+    london: 'International',
+    paris: 'International',
+    tokyo: 'International'
+  };
+
+  private _selection: ReservationSelection | null = null;
+
+  @Input() set selection(value: ReservationSelection | null) {
+    this._selection = value;
+    this.enforceDocumentTypeForDestination();
+  }
+
+  get selection(): ReservationSelection | null {
+    return this._selection;
+  }
+
   @Output() cleared = new EventEmitter<void>();
 
   guestName = '';
@@ -31,6 +49,10 @@ export class ReservationComponent {
     return this.selection?.room ?? null;
   }
 
+  get isInternationalDestination(): boolean {
+    return this.getDestinationCategory(this.selection?.destination) === 'International';
+  }
+
   reserve() {
     this.error = null;
     const guestName = this.guestName.trim();
@@ -38,6 +60,17 @@ export class ReservationComponent {
 
     if (!this.selection || !guestName || !documentNumber) {
       this.error = 'All fields are required';
+      return;
+    }
+
+    this.enforceDocumentTypeForDestination();
+
+    const destinationValidationError = this.validateDocumentForDestination(
+      this.selection.destination,
+      this.documentType
+    );
+    if (destinationValidationError) {
+      this.error = destinationValidationError;
       return;
     }
 
@@ -113,5 +146,34 @@ export class ReservationComponent {
     }
 
     return value == null || value === '' ? '—' : String(value);
+  }
+
+  private validateDocumentForDestination(destination: string, documentType: DocumentType): string | null {
+    const category = this.getDestinationCategory(destination);
+
+    if (!category) {
+      return `Unknown destination: ${destination}`;
+    }
+
+    if (category === 'International' && documentType !== DocumentType.Passport) {
+      return `International destination '${destination}' requires Passport, but ${documentType} provided`;
+    }
+
+    return null;
+  }
+
+  private getDestinationCategory(destination: string | undefined): 'Domestic' | 'International' | null {
+    if (!destination) {
+      return null;
+    }
+
+    const normalizedDestination = destination.trim().toLowerCase();
+    return ReservationComponent.destinationCategories[normalizedDestination] ?? null;
+  }
+
+  private enforceDocumentTypeForDestination(): void {
+    if (this.isInternationalDestination && this.documentType === DocumentType.NationalId) {
+      this.documentType = DocumentType.Passport;
+    }
   }
 }

@@ -18,7 +18,7 @@ public enum RoomType
 ```csharp
 public enum CancellationPolicy
 {
-    FreeCancellation,      // Up to 48h (PremierStays) or 24h (BudgetNests) before check-in
+    FreeCancellation,      // Free cancellation window varies by provider policy
     Flexible,               // Flexible cancellation
     NonRefundable           // Non-refundable
 }
@@ -121,9 +121,9 @@ public class HotelSearchQuery
 
 **Query Parameters:**
 - `destination` (string, required)
-- `checkIn` (date, required, format: YYYY-MM-DD)
-- `checkOut` (date, required, format: YYYY-MM-DD)
-- `roomType` (enum, optional)
+- `checkIn` (date, required, expected format: YYYY-MM-DD)
+- `checkOut` (date, required, expected format: YYYY-MM-DD)
+- `roomType` (enum, optional; invalid values are currently ignored and treated as no filter)
 
 **Response (200 OK):**
 ```json
@@ -154,6 +154,7 @@ public class HotelSearchQuery
     "error": "checkOut must be after checkIn"
   }
   ```
+- `400 Bad Request` - invalid date format for checkIn/checkOut
 
 ---
 
@@ -193,6 +194,12 @@ public class HotelSearchQuery
   ```json
   {
     "error": "International destination 'Paris' requires Passport, but NationalId provided"
+  }
+  ```
+- `422 Unprocessable Entity` - unknown destination
+  ```json
+  {
+    "error": "Unknown destination: Berlin"
   }
   ```
 - `400 Bad Request` - missing required fields
@@ -293,7 +300,7 @@ public interface IHotelProvider
 
 - No database persistence; all reservations in-memory
 - No authentication/authorization
-- All dates in YYYY-MM-DD format
+- API expects dates in YYYY-MM-DD format (ISO date)
 - Stub providers return deterministic data (same for same inputs)
-- Rates are per-night; UI must calculate total
+- Rates are per-night; API also returns computed totals for convenience (`totalStayPrice` / `totalPrice`)
 - Search runs offline; providers are local stubs
